@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   DndContext,
@@ -10,6 +10,8 @@ import {
   TouchSensor,
   useDroppable,
 } from "@dnd-kit/core";
+import toast, { Toaster } from "react-hot-toast";
+import { ChevronsDown } from "lucide-react";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import useCalculatorStore from "../Store/calculatorStore";
 import SortableComponent from "./SortableComponent";
@@ -22,6 +24,15 @@ const DroppableArea = ({ children, darkMode }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: "calculator-area",
   });
+
+  useEffect(() => {
+    toast(
+      <div className="flex items-center gap-2">
+        <ChevronsDown size={18} />
+        Drag and Drop the Buttons from Here
+      </div>
+    );
+  }, []);
 
   return (
     <div
@@ -177,6 +188,28 @@ const CalculatorBuilder = () => {
             <ComponentPalette onAddComponent={addComponent} />
           </div>
         </div>
+        <Toaster
+          containerStyle={{
+            position: "fixed",
+            width: "25em",
+            top: "87%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+          }}
+          toastOptions={{
+            style: {
+              color: darkMode ? "white" : "black",
+              backgroundColor: darkMode ? "transparent" : "rgb(168, 165, 165)",
+              border: darkMode
+                ? "2px solid rgb(172, 167, 167)"
+                : "2px solid rgb(172, 167, 167)",
+              fontFamily: "Poppins",
+              fontSize: "0.75em",
+              fontWeight: "400",
+            },
+          }}
+        />
       </DndContext>
     </motion.div>
   );
