@@ -25,15 +25,6 @@ const DroppableArea = ({ children, darkMode }) => {
     id: "calculator-area",
   });
 
-  useEffect(() => {
-    toast(
-      <div className="flex items-center gap-2">
-        <ChevronsDown size={18} />
-        Drag and Drop the Buttons from Here
-      </div>
-    );
-  }, []);
-
   return (
     <div
       ref={setNodeRef}
@@ -70,6 +61,15 @@ const CalculatorBuilder = () => {
       },
     })
   );
+
+  useEffect(() => {
+    toast(
+      <div className="flex items-center gap-2">
+        <ChevronsDown size={18} />
+        Drag and Drop the Buttons from Here
+      </div>
+    );
+  }, []);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
