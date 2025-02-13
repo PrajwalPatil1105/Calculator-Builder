@@ -7,7 +7,7 @@ const useCalculatorStore = create(
       components: [],
       history: [],
       currentStep: -1,
-      darkMode: false,
+      darkMode: true,
       display: {
         expression: "",
         result: "0",

@@ -165,9 +165,11 @@ const CalculatorBuilder = () => {
           }}
           toastOptions={{
             style: {
-              color: "white",
-              backgroundColor: "transparent",
-              border: "2px solid rgb(172, 167, 167)",
+              color: darkMode ? "white" : "black",
+              backgroundColor: darkMode ? "transparent" : "rgb(168, 165, 165)",
+              border: darkMode
+                ? "2px solid rgb(172, 167, 167)"
+                : "2px solid rgb(172, 167, 167)",
               fontFamily: "Poppins",
               fontSize: "0.75em",
               fontWeight: "400",
