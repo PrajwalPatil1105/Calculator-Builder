@@ -1,7 +1,5 @@
-import React, { useEffect } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import React from "react";
 import { motion } from "framer-motion";
-import { ChevronsDown } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -10,6 +8,7 @@ import {
   useSensors,
   PointerSensor,
   TouchSensor,
+  useDroppable,
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import useCalculatorStore from "../Store/calculatorStore";
@@ -18,6 +17,23 @@ import ComponentPalette from "./ComponentPalette";
 import { Display } from "./Display";
 import DarkModeToggle from "./DarkModeToggle";
 import { CalculatorButton } from "./CalculatorButton";
+
+const DroppableArea = ({ children, darkMode }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: "calculator-area",
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3 md:gap-4 mb-24 min-h-[100px] ${
+        isOver ? (darkMode ? "bg-gray-700/30" : "bg-gray-100/50") : ""
+      } rounded-lg transition-colors`}
+    >
+      {children}
+    </div>
+  );
+};
 
 const CalculatorBuilder = () => {
   const {
@@ -44,28 +60,35 @@ const CalculatorBuilder = () => {
     })
   );
 
-  useEffect(() => {
-    toast(
-      <div className="flex items-center gap-2">
-        <ChevronsDown size={18} />
-        Drag and Drop the Buttons from Here
-      </div>
-    );
-  }, []);
   const handleDragEnd = (event) => {
     const { active, over } = event;
 
-    if (active.data.current?.type === "palette" && over) {
-      const { componentData } = active.data.current;
-      const id = `calc_${componentData.type}_${Date.now()}`;
-      addComponent({
-        id,
-        type: "button",
-        props: {
-          ...componentData,
-          darkMode,
-        },
-      });
+    if (active.data.current?.type === "palette") {
+      if (
+        over &&
+        (over.id === "calculator-area" ||
+          components.some((comp) => comp.id === over.id))
+      ) {
+        const { componentData } = active.data.current;
+        const id = `calc_${componentData.type}_${Date.now()}`;
+        const newComponent = {
+          id,
+          type: "button",
+          props: {
+            ...componentData,
+            darkMode,
+          },
+        };
+
+        if (over.id === "calculator-area") {
+          addComponent(newComponent);
+        } else {
+          const newIndex = components.findIndex((comp) => comp.id === over.id);
+          const newComponents = [...components];
+          newComponents.splice(newIndex, 0, newComponent);
+          updateLayout(newComponents);
+        }
+      }
       return;
     }
 
@@ -98,7 +121,7 @@ const CalculatorBuilder = () => {
           {/* ----------------------------- Header--------------------------- */}
           <div className="grid grid-cols-12 gap-4 mb-6 items-center">
             <h1
-              className={`col-span-12 lg:col-span-6 text-2xl md:text-3xl font-md ${
+              className={`col-span-12 lg:col-span-6 text-2xl md:text-3xl font-bold ${
                 darkMode ? "text-white" : "text-gray-800"
               } text-center lg:text-left`}
             >
@@ -133,12 +156,12 @@ const CalculatorBuilder = () => {
             <Display darkMode={darkMode} />
           </div>
 
-          {/* Calculator area */}
+          {/*----------------------------Calculator area----------------------*/}
           <SortableContext
             items={components.map((c) => c.id)}
             strategy={rectSortingStrategy}
           >
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3 md:gap-4 mb-24">
+            <DroppableArea darkMode={darkMode}>
               {components.map((component) => (
                 <SortableComponent
                   key={component.id}
@@ -146,7 +169,7 @@ const CalculatorBuilder = () => {
                   onRemove={() => removeComponent(component.id)}
                 />
               ))}
-            </div>
+            </DroppableArea>
           </SortableContext>
 
           {/* -------------------------------Component palette--------------------------------- */}
@@ -154,28 +177,6 @@ const CalculatorBuilder = () => {
             <ComponentPalette onAddComponent={addComponent} />
           </div>
         </div>
-        <Toaster
-          containerStyle={{
-            position: "fixed",
-            width: "25em",
-            top: "87%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 9999,
-          }}
-          toastOptions={{
-            style: {
-              color: darkMode ? "white" : "black",
-              backgroundColor: darkMode ? "transparent" : "rgb(168, 165, 165)",
-              border: darkMode
-                ? "2px solid rgb(172, 167, 167)"
-                : "2px solid rgb(172, 167, 167)",
-              fontFamily: "Poppins",
-              fontSize: "0.75em",
-              fontWeight: "400",
-            },
-          }}
-        />
       </DndContext>
     </motion.div>
   );
